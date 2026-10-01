@@ -1,0 +1,255 @@
+
+/* CSS Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Base Body Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f6f9;
+  color: #333;
+  line-height: 1.6;
+  padding: 20px;
+}
+
+
+/* Header */
+header {
+  background-color: #1e3a5f;
+  color: #ffffff;
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: 10px;
+}
+
+header h1 {
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+header p {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+
+/* Navigation */
+nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+nav a {
+  color: #ffffff;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+  background-color: #3b5f89;
+  text-decoration: underline;
+}
+
+
+/* Main Content */
+main {
+  max-width: 900px;
+  margin: 25px auto;
+}
+
+/* Section Cards */
+section {
+  background-color: #ffffff;
+  padding: 25px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+section h2,
+main > h2 {
+  color: #1e3a5f;
+  margin-bottom: 15px;
+}
+
+section p {
+  margin-bottom: 10px;
+}
+
+/* Lists */
+section ol,
+section ul:not(.features) {
+  padding-left: 25px;
+}
+
+section li {
+  margin-bottom: 8px;
+}
+
+
+/* Features Grid */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+}
+
+.features li {
+  background-color: #edf3fa;
+  padding: 20px;
+  border-left: 4px solid #1e3a5f;
+  border-radius: 8px;
+  margin: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.features li:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+
+/* Keyboard Shortcuts Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th,
+td {
+  border: 1px solid #cbd5e1;
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #1e3a5f;
+  color: #ffffff;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f1f5f9;
+}
+
+
+/* Feedback Form */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+form div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+label {
+  font-weight: bold;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  font: inherit;
+}
+
+input:focus,
+textarea:focus {
+  outline: 2px solid #3b82f6;
+  border-color: #3b82f6;
+}
+
+textarea {
+  resize: vertical;
+}
+
+
+/* Buttons */
+button {
+  background-color: #1e3a5f;
+  color: #ffffff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease,
+              transform 0.3s ease;
+}
+
+button:hover {
+  background-color: #3b5f89;
+  transform: translateY(-2px);
+}
+
+button:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 3px;
+}
+
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  header {
+    padding: 20px 10px;
+  }
+
+  header h1 {
+    font-size: 24px;
+  }
+
+  header p {
+    font-size: 14px;
+  }
+
+  main {
+    margin: 15px auto;
+  }
+
+  section {
+    padding: 18px;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  th,
+  td {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  button {
+    width: 100%;
+  }
+}
