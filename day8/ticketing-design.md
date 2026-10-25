@@ -258,6 +258,105 @@ If payment succeeds after the reservation has expired and the seat has been reas
 
 The central principle is that seat availability must be enforced by the database through transactions, locks and constraints. Application-level checks alone are insufficient because simultaneous requests can pass the same initial availability check.
 
+### 5.5 SQL Transaction Demonstrating Double-Booking Prevention
+
+The following PostgreSQL example demonstrates how TicketHub prevents two customers from holding the same seat. It combines row-level locking, conditional updates, database constraints and transactions.
+
+First, create a partial unique index to ensure that a seat cannot have more than one active hold:
+
+```sql
+CREATE UNIQUE INDEX one_active_hold_per_seat
+ON seat_holds (seat_id)
+WHERE status = 'active';
+```
+
+The index provides a database-level safeguard against duplicate active holds. Expired holds must be marked as expired before a new active hold can be created.
+
+When a customer requests a seat, the application executes the following operations within a single database transaction:
+
+```sql
+BEGIN;
+
+-- Step 1: Lock the requested seat.
+SELECT seat_id, status
+FROM seats
+WHERE seat_id = :seat_id
+  AND event_id = :event_id
+FOR UPDATE;
+
+-- The application must reject the request if no seat is found.
+
+-- Step 2: Expire any previous hold that has elapsed.
+UPDATE seat_holds
+SET status = 'expired'
+WHERE seat_id = :seat_id
+  AND status = 'active'
+  AND expires_at <= CURRENT_TIMESTAMP;
+
+-- Step 3: Release the seat if it was held but has
+-- no remaining active, unexpired hold.
+UPDATE seats
+SET status = 'available'
+WHERE seat_id = :seat_id
+  AND status = 'held'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM seat_holds
+      WHERE seat_id = :seat_id
+        AND status = 'active'
+        AND expires_at > CURRENT_TIMESTAMP
+  );
+
+-- Step 4: Claim the seat only if it is available.
+UPDATE seats
+SET status = 'held'
+WHERE seat_id = :seat_id
+  AND event_id = :event_id
+  AND status = 'available'
+RETURNING seat_id;
+
+-- Step 5: Application checks the UPDATE result.
+-- If zero rows are returned, ROLLBACK.
+-- If one row is returned, create the hold.
+
+INSERT INTO seat_holds (
+    seat_id,
+    user_id,
+    expires_at,
+    status,
+    created_at
+)
+VALUES (
+    :seat_id,
+    :user_id,
+    CURRENT_TIMESTAMP + INTERVAL '5 minutes',
+    'active',
+    CURRENT_TIMESTAMP
+);
+
+COMMIT;
+```
+
+The application must verify that Step 1 finds the requested seat and that Step 4 returns exactly one row. If either check fails, it must roll back the transaction and return an appropriate error. If the hold insertion violates a database constraint, the transaction must also be rolled back.
+
+### What Happens When Two Customers Request the Same Seat?
+
+Suppose Customers A and B request seat 105 simultaneously.
+
+1. Customer A obtains the row-level lock first.
+2. Customer A verifies availability, changes the seat status to held, creates an active hold and commits the transaction.
+3. Customer B waits until the lock becomes available.
+4. After obtaining the lock, Customer B sees that the seat is no longer available.
+5. Customer B's conditional update returns zero rows. The application rolls back the transaction and rejects the reservation.
+
+Therefore, both customers cannot successfully hold the same seat.
+
+The unique index provides an additional safeguard if competing operations attempt to create duplicate active holds. All operations that create, expire or release holds must follow the same locking and state-transition rules.
+
+When payment succeeds, TicketHub must verify that the order still owns the reservation before issuing a ticket. A unique constraint on the ticket's seat identifier provides another layer of protection against duplicate ticket issuance.
+
+This approach demonstrates defence in depth: row-level locks coordinate concurrent requests, conditional updates enforce seat availability, transactions keep related changes consistent, and database constraints protect critical invariants.
+
 ## 6. System Architecture
 
 ### 6.1 Architecture Diagram
